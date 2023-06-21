@@ -1,0 +1,13 @@
+{
+  "extends": "tsconfig/nextjs.json",
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "../../packages/ui/global.d.ts"
+  ],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "downlevelIteration": true
+  }
+}

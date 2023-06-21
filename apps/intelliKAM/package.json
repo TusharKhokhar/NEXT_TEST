@@ -1,0 +1,71 @@
+{
+  "name": "intelliKam",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "yarn run generate && prisma migrate deploy && yarn run seed && next build",
+    "start": "next start --port 3000",
+    "lint": "next lint",
+    "postinstall": "cp -R ../../node_modules/prisma/node_modules/@prisma/engines ../../node_modules/@prisma",
+    "fix": "cp -r schema.prisma /tmp/s.prisma && uniq /tmp/s.prisma schema.prisma",
+    "setup": "rimraf schema.prisma && prismix && yarn fix && prisma format",
+    "generate": "yarn setup && prisma generate",
+    "migrate": "yarn setup && prisma migrate deploy",
+    "create": "yarn setup && prisma migrate dev",
+    "seed": "yarn prisma db seed",
+    "precommit": "lint-staged"
+  },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.347.1",
+    "@reduxjs/toolkit": "^1.9.5",
+    "auth": "*",
+    "aws-sdk": "^2.1377.0",
+    "classnames": "^2.3.2",
+    "codex-notifier": "^1.1.2",
+    "daisyui": "^3.1.1",
+    "fetcher": "*",
+    "next": "12.0.8",
+    "next-redux-wrapper": "^8.1.0",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "react-icomoon": "^2.5.7",
+    "react-redux": "^8.0.5",
+    "react-select": "^5.7.3",
+    "react-world-flags": "^1.5.1",
+    "stripe": "^12.7.0",
+    "ts-node": "^10.9.1",
+    "ui": "*",
+    "validator": "^13.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.2.3",
+    "@types/react": "17.0.37",
+    "@types/react-world-flags": "^1.4.2",
+    "@types/validator": "^13.7.12",
+    "autoprefixer": "^10.4.12",
+    "eslint": "7.32.0",
+    "eslint-config-custom": "*",
+    "husky": "^8.0.3",
+    "next-transpile-modules": "9.0.0",
+    "postcss": "^8.4.16",
+    "tailwindcss": "^3.1.8",
+    "ts-node": "^10.9.1",
+    "tsconfig": "*",
+    "typescript": "^5.0.4"
+  },
+  "prisma": {
+    "schema": "schema.prisma",
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} ./prisma/seed.ts"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn run precommit"
+    }
+  },
+  "lint-staged": {
+    "*": [
+      "yarn run lint"
+    ]
+  }
+}

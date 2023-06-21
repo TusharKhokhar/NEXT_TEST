@@ -1,0 +1,46 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  DiscordUser   DiscordUser?
+  TwitterUser   TwitterUser?
+  InstagramUser InstagramUser?
+  Wallet        Wallet?
+}
+
+model DiscordUser {
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  discordName String
+  token       String
+  discordId   String
+}
+
+model TwitterUser {
+  userId    String @unique
+  user      User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  username  String
+  token     String
+  twitterId String @unique
+
+  @@id([userId, twitterId])
+}
+
+model InstagramUser {
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  username    String
+  token       String
+  instagramId String @unique
+
+  @@id([userId, instagramId])
+}
+
+model Wallet {
+  userId  String @unique
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  address String @unique
+}

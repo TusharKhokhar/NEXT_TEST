@@ -1,0 +1,12 @@
+{
+  "mixers": [
+    {
+      "input": [
+        "../../packages/db/base.prisma",
+        "../../packages/auth/schema.prisma",
+        "./prisma/schema.prisma"
+      ],
+      "output": "schema.prisma"
+    }
+  ]
+}

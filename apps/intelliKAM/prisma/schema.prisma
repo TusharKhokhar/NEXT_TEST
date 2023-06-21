@@ -1,0 +1,295 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum userType {
+  CUSTOMER_ADMIN
+  CUSTOMER_STANDARD
+  SUPER_ADMIN
+}
+
+model User {
+  id              String           @id @default(uuid())
+  firstName       String?
+  lastName        String?
+  phoneVerified   Boolean          @default(false) 
+  verificationCode Int?
+  jobTitle        String?
+  isActive        Boolean          @default(false)
+  userType        userType?
+  accountNumber   String?
+  createdById     String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime?
+  phoneNumber     String?
+  createdBy       User?            @relation(name: "userUsers", fields: [createdById], references: [id])
+  users           User[]           @relation(name: "userUsers")
+  billingHistory  BillingHistory[]
+  connectedEmail  ConnectedEmail?
+  salesforce      Salesforce?
+  company         Company?
+  campaigns       Campaigns[]
+  prospects       Prospects[]
+
+  @@map("users")
+}
+
+model Lead {
+  id             String           @id @default(cuid())
+  firstName      String?
+  lastName       String?
+  email          String
+  userType       userType?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime?
+  phoneNumber    String?
+  accountCreated Boolean          @default(false)
+  companyName    String?
+  companyWebsite String?
+  @@map("leads")
+}
+
+enum planType {
+  MONTHLY
+  ANNUALLY
+}
+
+model ActivePlan {
+  id               String    @id @default(cuid())
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime?
+  planId           String
+  companyId        String
+  // billingHistory BillingHistory[]
+
+  @@map("activePlans")
+}
+
+enum paymentTermType {
+  ON_THE_DAY
+  WEEK       @map("7days")
+  MONTH      @map("30days")
+  TWO_MONTH  @map("60days")
+}
+
+enum paymentMethodType {
+  CREDIT_CARD
+  MONTHLY_INVOICE
+}
+
+enum billingStatus {
+  PAID
+  EXPIRED
+  PENDING
+}
+
+enum subscriptionModel {
+  PAY_AS_YOU_GO
+}
+
+model BillingHistory {
+  id                String            @id @default(cuid())
+  userId            String
+  planId            String
+  status            billingStatus     @default(PENDING)
+  paymentId         String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime?
+  expiryDate        DateTime?
+  purchaseDate      DateTime?
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // activePlan ActivePlan?   @relation(fields: [planId], references: [planId], onDelete: Cascade)
+
+  @@map("billinghistory")
+}
+
+model ConnectedEmail {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  token        String?
+  refreshToken String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("connectedemail")
+}
+
+model Salesforce {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  instanceUrl  String?
+  token        String?
+  refreshToken String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("salesforce")
+}
+
+model Company {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  name         String
+  website      String?
+  industry     String?
+  address      String?
+  description  String?   @db.MediumText
+  isProviderOf String?
+  logo         String?
+  location     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime?
+
+  user     User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products Products[]
+
+  @@map("company")
+}
+
+model Products {
+  id            String    @id @default(cuid())
+  companyId     String
+  name          String
+  whatDoesItDo  String?   @db.MediumText
+  HowDoesItWork String?   @db.MediumText
+  benefits      String?   @db.MediumText
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime?
+
+  company          Company            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  campaignProducts CampaignProducts[]
+
+  @@map("products")
+}
+
+enum videoAvatarType {
+  MALE
+  FEMALE
+}
+
+enum scriptToneType {
+  COMEDIC
+  FORMAL
+  INFORMAL
+  OPTIMISTIC
+  FRIENDLY
+  ENCOURAGING
+}
+
+model Campaigns {
+  id                      String           @id @default(cuid())
+  userId                  String
+  name                    String
+  videoAvatar             videoAvatarType?
+  videoBackground         String?
+  scriptTone              scriptToneType   @default(COMEDIC)
+  runAutoCampaign         Boolean?
+  prospectNameIncluded    Boolean          @default(true)
+  companyNameIncluded     Boolean          @default(true)
+  companyEmailIncluded    Boolean          @default(true)
+  companyPhoneIncluded    Boolean          @default(true)
+  companyJobTitleIncluded Boolean          @default(true)
+  videoAnimation          String?
+  campaignStartDate       DateTime?
+  firstFollowUpDate       DateTime?
+  secondFollowUpDate      DateTime?
+  createdAt               DateTime         @default(now())
+  updatedAt               DateTime?
+
+  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prospect            Prospects[]
+  lineItemPerCampaign LineItemPerCampaign[]
+  campaignProducts    CampaignProducts[]
+  qrCodes             qrCodes[]
+
+  @@map("campaigns")
+}
+
+enum qrCodeType {
+  PERSONAL
+  COMPANY
+}
+
+enum qrType {
+  WEBSITE
+  WHATSAPP
+  SMS
+}
+
+model qrCodes {
+  id         String      @id @default(cuid())
+  campaignId String
+  qrCodeLink String?
+  type       qrCodeType?
+  qrType     qrType?
+  campaign   Campaigns   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@map("qrcodes")
+}
+
+model Prospects {
+  id                  String                @id @default(cuid())
+  createdBy           String
+  campaignId          String
+  firstName           String
+  lastName            String
+  email               String?
+  phoneNumber         String?
+  companyName         String
+  jobTitle            String?
+  country             String?
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime?
+  website             String?
+  createdByUser       User                  @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  campaign            Campaigns             @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  lineItemPerCampaign LineItemPerCampaign[]
+
+  @@unique([campaignId, email])
+  @@map("prospects")
+}
+
+enum emailStatusType {
+  SUCCESS
+  FAIL
+}
+
+model LineItemPerCampaign {
+  id           String           @id @default(cuid())
+  campaignId   String
+  prospectId   String
+  videoId      String?
+  emailStatus  emailStatusType?
+  chatGPTStory String?          @db.MediumText
+  emailBody    String?          @db.LongText
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime?
+
+  campaign Campaigns @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  prospect Prospects @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, prospectId])
+  @@map("lineitempercampaign")
+}
+
+model CampaignProducts {
+  campaignId String
+  productId  String
+
+  campaign Campaigns @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  product  Products  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, productId])
+}

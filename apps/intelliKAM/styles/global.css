@@ -1,0 +1,68 @@
+.button-salesforce-connect{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+.saleforce-table{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+.plan_outer input:checked~.plan_border {
+    border-color: #00C6C6 !important;
+    transition: 0.5s;
+}
+
+.plan_check div {
+    opacity: 0;
+}
+
+.plan_outer input:checked~.plan_border .plan_check div {
+    opacity: 1;
+    transition: 0.5s;
+}
+
+.plan_outer input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+}
+
+.input_checkbox input:checked~span {
+    background: #00C6C6;
+}
+
+.input_checkbox input:checked~span:after {
+    position: absolute;
+    content: "";
+    width: 11.2px;
+    height: 9.6px;
+    right: 0;
+    background-image: url(/images/checked_icon.svg);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+}
+.hove_button:hover svg, .hove_button:hover svg path {
+    fill: #00C6C6 !important;
+}
+
+.css-13cymwt-control, div .css-t3ipsp-control {
+    padding: 0 !important;
+    border: none !important;
+    border-color: transparent !important;
+    outline: none !important;
+    background: transparent !important;
+    white-space: nowrap !important;
+    letter-spacing: 0 !important;
+    box-shadow: none !important;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

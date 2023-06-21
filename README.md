@@ -1,90 +1,67 @@
-# Next + Netlify Starter
+# About MAS repo
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/46648482-644c-4c80-bafb-872057e51b6b/deploy-status)](https://app.netlify.com/sites/next-dev-starter/deploys)
+This repo is the common repo that will be used among all the projects
 
-This is a [Next.js](https://nextjs.org/) v12 project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) and set up to be instantly deployed to [Netlify](https://url.netlify.com/SyTBPVamO)!
+## Installation
 
-This project is a very minimal starter that includes 2 sample components, a global stylesheet, a `netlify.toml` for deployment, and a `jsconfig.json` for setting up absolute imports and aliases. With Netlify, you'll have access to features like Preview Mode, server-side rendering/incremental static regeneration via Netlify Functions, and internationalized routing on deploy automatically.
+### Prerequisites:
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/netlify-templates/next-netlify-starter&utm_source=github&utm_medium=nextstarter-cs&utm_campaign=devex-cs)
+- node.js >=14.0.0
+- yarn v1
+- mysql
+- unix-like OS environemnt
 
-(If you click this button, it will create a new repo for you that looks exactly like this one, and sets that repo up immediately for deployment on Netlify)
+### Running locally for dev
 
-## Table of Contents:
+- After cloning the repo, you also need to clone the packages folder.
+  - `git submodule update --init` clone the mas-packages folder.
+- cp `.env.example` to `.env`
+- update the DB url and double check all your env variables
+- `yarn install` to install all depencencies
+- Setting up the db.
+  - Run all pending migrations with `yarn workspace intelliKam run migrate`
+  - Generate prisma definitions with `yarn workspace intelliKam run generate`
+  - Seed prisma definitions with `yarn workspace intelliKam run seed`
+- To start the dev server, run `yarn dev`.
+- If all went well, you should see a dev server on http://localhost:3001
 
-- [Getting Started](#getting-started)
-- [Installation options](#installation-options)
-- [Testing](#testing)
-  - [Included Default Testing](#included-default-testing)
-  - [Removing Renovate](#removing-renovate)
-  - [Removing Cypress](#removing-cypress)
+## Project structure
 
-## Getting Started
+This repo uses yarn workspaces. Ref: https://classic.yarnpkg.com/en/docs/workspaces/
 
-First, run the development server:
+### Packages
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+Libraries common to MAS go into the package folder.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+#### Creating a new library
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+- create a new folder inside the packages folder and name it appropriately. e.g. 'XYZ'
+- create a `package.json` file. If you're unsure copy from the 'db' folder.
+  - set it the same name `XYZ`
+  - set the main and types field to `index.ts`
+  - If you already have dependencies and their versions, you can put it here.
+  - **IMPORTANT** Don't run `yarn add` inside the folder
+  - cd back into the root folder, then run `yarn workspace XYZ add ABC` where `ABC` is the package name.
+- to use this package, go to the `apps/APP_NAME` folder
+  - update package.json dependency array with `ABC: "*"`. Ref `apps/docs/package.json`
 
-### Installation options
+### DB updates
 
-**Option one:** One-click deploy
+- DB is managed by prisma and prismix. **IMPORTANT** Please don't update `prisma.schema` or `base.schema`.
+- prismix supports multiple `schema.prisma` files as long as they are in one of the apps or packages folder.
+- Run `yarn workspace db run create`. This will create corresponding .sql migration files for your changes.
+  - appropriately set a name for the migration.
+  - use sql terms like `create, alter, drop, delete` etc. to describe your changes.
+  - check the outputted `packages/db/schema.prisma` file to make sure there are no errors in the generated sql files.
+  - check the db using a F/E like mysqlworkbench or phpmyadmin to confirm if the changes are actually reflected.
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/netlify-templates/next-netlify-starter&utm_source=github&utm_medium=nextstarter-cs&utm_campaign=devex-cs)
+## Useful Links
 
-**Option two:** Manual clone
+Learn more about the power of Turborepo:
 
-1. Clone this repo: `git clone https://github.com/netlify-templates/next-netlify-starter.git`
-2. Navigate to the directory and run `npm install`
-3. Run `npm run dev`
-4. Make your changes
-5. Connect to [Netlify](https://url.netlify.com/Bk4UicocL) manually (the `netlify.toml` file is the one you'll need to make sure stays intact to make sure the export is done and pointed to the right stuff)
-
-## Testing
-
-### Included Default Testing
-
-We’ve included some tooling that helps us maintain these templates. This template currently uses:
-
-- [Renovate](https://www.mend.io/free-developer-tools/renovate/) - to regularly update our dependencies
-- [Cypress](https://www.cypress.io/) - to run tests against how the template runs in the browser
-- [Cypress Netlify Build Plugin](https://github.com/cypress-io/netlify-plugin-cypress) - to run our tests during our build process
-
-If your team is not interested in this tooling, you can remove them with ease!
-
-### Removing Renovate
-
-In order to keep our project up-to-date with dependencies we use a tool called [Renovate](https://github.com/marketplace/renovate). If you’re not interested in this tooling, delete the `renovate.json` file and commit that onto your main branch.
-
-### Removing Cypress
-
-For our testing, we use [Cypress](https://www.cypress.io/) for end-to-end testing. This makes sure that we can validate that our templates are rendering and displaying as we’d expect. By default, we have Cypress not generate deploy links if our tests don’t pass. If you’d like to keep Cypress and still generate the deploy links, go into your `netlify.toml` and delete the plugin configuration lines:
-
-```diff
-[[plugins]]
-  package = "netlify-plugin-cypress"
--  [plugins.inputs.postBuild]
--    enable = true
--
--  [plugins.inputs]
--    enable = false 
-```
-
-If you’d like to remove the `netlify-plugin-cypress` build plugin entirely, you’d need to delete the entire block above instead. And then make sure sure to remove the package from the dependencies using:
-
-```bash
-npm uninstall -D netlify-plugin-cypress
-```
-
-And lastly if you’d like to remove Cypress entirely, delete the entire `cypress` folder and the `cypress.config.ts` file. Then remove the dependency using:
-
-```bash
-npm uninstall -S cypress
-```
+- [Pipelines](https://turborepo.org/docs/core-concepts/pipelines)
+- [Caching](https://turborepo.org/docs/core-concepts/caching)
+- [Remote Caching (Beta)](https://turborepo.org/docs/core-concepts/remote-caching)
+- [Scoped Tasks](https://turborepo.org/docs/core-concepts/scopes)
+- [Configuration Options](https://turborepo.org/docs/reference/configuration)
+- [CLI Usage](https://turborepo.org/docs/reference/command-line-reference)
